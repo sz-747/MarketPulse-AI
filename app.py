@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import streamlit as st
 
-from backend import get_fresh_news, summarize_news
+from backend import get_fresh_news, summarize_news, ask_document
 
 
 def render_articles(articles: List[Dict[str, str]]) -> None:
@@ -31,28 +31,42 @@ def main() -> None:
     st.set_page_config(page_title="MarketPulse AI")
     st.title("MarketPulse AI 📈")
 
-    ticker_input = st.text_input("Ticker Symbol", value="AAPL").strip().upper()
+    tab_live, tab_earnings = st.tabs(["Live News", "Earnings Analyst"])
 
-    if st.button("Get News"):
-        if not ticker_input:
-            st.warning("Please enter a ticker symbol.")
-            return
+    with tab_live:
+        ticker_input = st.text_input("Ticker Symbol", value="AAPL").strip().upper()
 
-        with st.spinner("Fetching news..."):
-            articles = get_fresh_news(ticker_input)
+        if st.button("Get News"):
+            if not ticker_input:
+                st.warning("Please enter a ticker symbol.")
+                return
 
-        if articles:
-            # AI summary
-            summary = summarize_news(articles)
-            if summary:
-                st.success(f"AI Analysis: {summary}")
+            with st.spinner("Fetching news..."):
+                articles = get_fresh_news(ticker_input)
 
-            st.success(f"Found {len(articles)} article(s) in the last 24 hours.")
-            render_articles(articles)
-        else:
-            st.info("No fresh articles found. Try another ticker or check back later.")
+            if articles:
+                summary = summarize_news(articles)
+                if summary:
+                    st.success(f"AI Analysis: {summary}")
+
+                st.success(f"Found {len(articles)} article(s) in the last 24 hours.")
+                render_articles(articles)
+            else:
+                st.info("No fresh articles found. Try another ticker or check back later.")
+
+    with tab_earnings:
+        st.header("Chat with the Q3 Earnings Report")
+        st.caption("Currently analyzing: NVIDIA Q3 FY2026 Transcript.")
+
+        question = st.text_input("Ask a question about the transcripts").strip()
+        if st.button("Ask Agent"):
+            if not question:
+                st.warning("Please enter a question.")
+            else:
+                with st.spinner("Thinking..."):
+                    answer = ask_document(question)
+                st.success(answer)
 
 
 if __name__ == "__main__":
     main()
-
