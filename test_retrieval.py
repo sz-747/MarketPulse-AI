@@ -42,9 +42,10 @@ def main() -> None:
     index_name = "marketpulse"
 
     store = get_vector_store(index_name)
-    hits = run_query(store, query, k=5)
+    k = 5
+    hits = run_query(store, query, k=k)
 
-    print(f"Query: {query}")
+    print(f"Query: {query} | k={k}")
     print("-" * 50)
     if not hits:
         print("No results found.")
@@ -53,8 +54,15 @@ def main() -> None:
     print("\nTop results:")
     for idx, (score, text, meta) in enumerate(hits, start=1):
         loc = meta.get("page", "unknown page") if isinstance(meta, dict) else "unknown"
-        print(f"\nResult {idx} | score={score:.4f} | page={loc}")
-        print(text)
+        speaker = meta.get("speaker") or meta.get("Speaker") if isinstance(meta, dict) else None
+        preview = " ".join(text.split())  # flatten whitespace
+        # show first 1-2 sentences (approx): split by '.' and join two parts
+        parts = preview.split(".")
+        preview_short = ".".join(parts[:2]).strip()
+        if preview_short:
+            preview_short = preview_short + "."
+        print(f"\nResult {idx} | score={score:.4f} | page={loc} | speaker={speaker or 'unknown'}")
+        print(preview_short)
         print("-" * 50)
 
 

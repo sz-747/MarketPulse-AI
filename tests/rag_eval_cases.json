@@ -1,0 +1,16 @@
+[
+  {
+    "question": "What is the revenue guidance for Q4?",
+    "case_type": "metric",
+    "value_terms": ["65", "billion"],
+    "period_terms": ["q4"],
+    "metric_terms": ["revenue", "guid"]
+  },
+  {
+    "question": "What did Colette say about Q4 revenue guidance?",
+    "case_type": "span",
+    "expected_span": "Total revenue is expected to be $65 billion, plus or minus 2%.",
+    "required_speaker": "Colette Kress"
+  }
+]
+

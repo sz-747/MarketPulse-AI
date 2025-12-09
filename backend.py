@@ -175,7 +175,8 @@ def ask_document(question: str) -> str:
     Retrieve top chunks from Pinecone and answer using Groq LLM.
     """
     try:
-        docs = vector_store.similarity_search(question, k=15)
+        results = vector_store.similarity_search_with_score(question, k=15)
+        docs = [doc for doc, _ in results]
     except Exception as exc:
         return f"Error during retrieval: {exc}"
 
@@ -192,6 +193,18 @@ def ask_document(question: str) -> str:
         f"Question: {question}\n\n"
         'If the answer is not in the context, say "I cannot find that information in the document."'
     )
+
+    debug = os.getenv("RETRIEVAL_DEBUG", "false").lower() in {"1", "true", "yes", "on"}
+    if debug:
+        print(f"[Retrieval Debug] query='{question}' | k=15")
+        for idx, (doc, score) in enumerate(results, start=1):
+            page = doc.metadata.get("page", "unknown")
+            speaker = doc.metadata.get("speaker") or doc.metadata.get("Speaker") or "unknown"
+            preview = " ".join(doc.page_content.split())[:300]
+            print(
+                f"  {idx}. score={score:.4f} | page={page} | speaker={speaker}\n"
+                f"     {preview}"
+            )
 
     try:
         resp = client.chat.completions.create(
